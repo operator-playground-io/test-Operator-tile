@@ -1,0 +1,44 @@
+{
+  "name": "Grafana Operator",
+  "description": "A Kubernetes Operator based on the Operator SDK for creating and managing Grafana instances. Grafana is an open platform for beautiful analytics and monitoring.",
+  "logo": "_images/logo.PNG",
+  "has_supporting_content": false,
+  "de_catalog_id": "Grafana_Operator-operator_1609309826387",
+  "source_repo": "https://github.com/operator-playground-io/Grafana-Operator-Playground-tile",
+  "cover": "cover.md",
+  "use_explorer_dataset": false,
+  "is_s3_type": false,
+  "meta": {
+    "Install Time": [
+      "5 minutes"
+    ],
+    "Type": [
+      "Operator"
+    ],
+    "Dataset": [
+      ""
+    ],
+    "Categories": [
+      "Monitoring"
+    ],
+    "Catalog Id": [
+      "Grafana_Operator-operator_1609309826387"
+    ],
+    "Contact": [],
+    "Command": [
+      [
+        {
+          "description": "Set Namespace",
+          "exec": "export GRAFANA_OPERATOR_NAMESPACE=my-grafana-operato"
+        },
+        {
+          "description": "Install Operator",
+          "exec": "kubectl create -f https://operatorhub.io/install/grafana-operator.yaml"
+        }
+      ]
+    ],
+    "Preferred Platform": [
+      "Kubernetes"
+    ]
+  }
+}
