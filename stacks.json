@@ -7,6 +7,7 @@
     "Operator"
   ],
   "tag": [],
+  "type": "stack",
   "stack_id": "Grafana_Operator-operator_1609309826387",
   "categories": [
     "Monitoring"
