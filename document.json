@@ -3,7 +3,7 @@
   "description": "A Kubernetes Operator based on the Operator SDK for creating and managing Grafana instances. Grafana is an open platform for beautiful analytics and monitoring.",
   "logo": "_images/logo.PNG",
   "has_supporting_content": false,
-  "stack_id": "Grafana_Operator-operator_1609309826387",
+  "stack_id": "Grafana_Operator_operator_1609309826387",
   "type": "stack",
   "source_repo": "https://github.com/operator-playground-io/Grafana-Operator-Playground-tile",
   "cover": "cover.md",
@@ -23,7 +23,7 @@
       "Monitoring"
     ],
     "Catalog Id": [
-      "Grafana_Operator-operator_1609309826387"
+      "Grafana_Operator_operator_1609309826387"
     ],
     "Contact": [],
   }
@@ -38,6 +38,6 @@
         }
     ],
     "platform": [
-      "Kubernetes"
+      "kubernetes"
     ]
 }
