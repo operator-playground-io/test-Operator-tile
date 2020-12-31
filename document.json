@@ -4,6 +4,7 @@
   "logo": "_images/logo.PNG",
   "has_supporting_content": false,
   "stack_id": "Grafana_Operator-operator_1609309826387",
+  "type": "stack",
   "source_repo": "https://github.com/operator-playground-io/Grafana-Operator-Playground-tile",
   "cover": "cover.md",
   "use_explorer_dataset": false,
@@ -25,8 +26,8 @@
       "Grafana_Operator-operator_1609309826387"
     ],
     "Contact": [],
-    "Command": [
-      [
+  }
+    "commands": [
         {
           "description": "Set Namespace",
           "exec": "export GRAFANA_OPERATOR_NAMESPACE=my-grafana-operato"
@@ -35,10 +36,8 @@
           "description": "Install Operator",
           "exec": "kubectl create -f https://operatorhub.io/install/grafana-operator.yaml"
         }
-      ]
     ],
-    "Preferred Platform": [
+    "platform": [
       "Kubernetes"
     ]
-  }
 }
