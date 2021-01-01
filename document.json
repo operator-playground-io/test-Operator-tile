@@ -1,9 +1,9 @@
 {
-  "name": "test - Grafana Operator",
+  "name": "test-Grafana Operator",
   "description": "Grafana Operator",
   "logo": "_images/dataset.png",
-  "has_supporting_content": false,
-  "stack_id": "test_-_Grafana_Operator-operator_1609481185652",
+  "has_supporting_content": true,
+  "stack_id": "test-Grafana_Operator-operator_1609491199116",
   "type": "Operators",
   "Categories": [
     "Monitoring"
@@ -11,7 +11,7 @@
   "platform": [
     null
   ],
-  "source_repo": "https://sourceurl.com",
+  "source_repo": "https://github.com/operator-playground-io/Grafana-Operator-Playground-tile",
   "cover": "cover.md",
   "use_explorer_dataset": false,
   "use_catalog_dataset": "",
@@ -31,24 +31,10 @@
       "Monitoring"
     ],
     "Catalog Id": [
-      "test_-_Grafana_Operator-operator_1609481185652"
+      "test-Grafana_Operator-operator_1609491199116"
     ],
     "Contact": [
       "email@example.com"
-    ],
-    "commands": [
-      {
-        "description": "Set Namespace",
-        "exec": "export GRAFANA_OPERATOR_NAMESPACE=my-grafana-operato"
-      },
-      {
-        "description": "Prepare Workspace",
-        "exec": "cd /home/student/projects && mkdir grafana-operator && cd grafana-operator"
-      },
-      {
-        "description": "Install Operator",
-        "exec": "kubectl create -f https://operatorhub.io/install/grafana-operator.yaml"
-      }
     ],
     "Preferred Platform": [
       "OpenShift"
@@ -60,7 +46,7 @@
       "Dec 29 2020"
     ],
     "Managed By": [
-      "Manager"
+      "Grafana"
     ],
     "License and Use Rights": [
       "Licence and use rights"
@@ -73,7 +59,7 @@
     },
     {
       "description": "Prepare Workspace",
-      "exec": "cd /home/student/projects && mkdir grafana-operator && cd grafana-operator"
+      "exec": "cd /home/student/projects && mkdir grafana-operator && cd grafana-operato"
     },
     {
       "description": "Install Operator",
