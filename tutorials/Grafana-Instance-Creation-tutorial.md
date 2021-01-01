@@ -112,12 +112,12 @@ Click on the <a href="http://##DNS.ip##:30200" target="_blank">http://##DNS.ip##
 
 
 You will see the Grafana page loading as below :
-![load.png](_images/load.png)
+![](_images/load.png)
 
 Now click on the `Sign In` button as below :
 
 
-![signin.png](_images/signin.png)
+![](_images/signin.png)
 
 
 You will now need to log-in to Grafana Dashboard with the following credentials:
@@ -128,12 +128,13 @@ user: root
 password: secret
 ```
 
-![login.png](_images/login.png)
+![](_images/login.png)
+
 
 Now you will be able to see the Dashboard like below:
 
 
-![dashboard.png](_images/dashboard.png)
+![](_images/dashboard.png)
 
    Running   0          45s
 ```

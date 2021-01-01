@@ -1,156 +1,676 @@
+---
+title: Prometheus Monitoring
+description: This tutorial explains how Prometheus monitors targets/endpoints
+---
 
-### Access Grafana Dashboard and configure it to show metrics
-
-Logged in to the Grafana UI and configure datasource.
-
-![dashboard.png](_images/dashboard.png)
-
-### Configure Your DataSource
-
-Data source could be a database(MySQL) or a collection of metrics(Prometheus).
-Here we will configure Grafana to connect MySQL database.In earlier steps we have created a database named "testdb" with a table: "Population".
-
-***Create your datasource as MySQL***
-
- Complete the web form with your connection details which will looks like below snapshot:
- 
- database: testdb 
- 
- username: root 
- 
- password: password 
- 
- host : ##DNS.ip##:30685 
-
-***Click on save and test***
-
-![mysql-datasource-connection.PNG](_images/mysql-datasource-connection.PNG)
+### Monitoring using Prometheus and Grafana 
 
 
-If everything is configured correctly, you should see a green box with the message Database Connection OK.
+Prometheus is designed to monitor targets. Servers, databases, standalone virtual machines etc can be monitored with Prometheus.
+
+Prometheus monitoring feature :
+
+- Prometheus is a pull based monitoring system.
+
+- Prometheus actively screens targets in order to retrieve metrics from them.
+
+- In order to monitor systems, Prometheus will periodically scrap them.
+
+- Prometheus expects to retrieve metrics via HTTP calls done to endpoints that are defined in Prometheus configuration.
+
+
+Lets take the example of MariaDB Server. Here, we will explain the monitoring of MariaDB Sever using Prometheus and how we can check these metrics on Grafana dashboard. 
+
+### How to monitor MariaDB server using Prometheus 
+
+Step 1:  Install the MariaDB operator and MariaDB Server Instance by following below Step 1 and Step 2. 
+If you already have MariaDB Operator installed and created MariaDB Server instance, you can skip with Step 1 and Step 2.
+
+Install the MariaDB operator by running the following command:
+
+```execute
+kubectl create -f https://operatorhub.io/install/mariadb-operator-app.yaml             
+```
+
+- After installation, verify that your operator got successfully installed by executing the below command:
+
+
+```execute
+kubectl get csv -n my-mariadb-operator-app
+```
+
+You will see a similar Output as below:
+
+```
+NAME                      DISPLAY            VERSION   REPLACES                  PHASE
+mariadb-operator.v0.0.4   Mariadb Operator   0.0.4     mariadb-operator.v0.0.3   Succeeded
+```
+
+Note: Once operator is successfully installed, Output PHASE should be as "Succeeded".
 
 
 
-### Create Your First Dashboard
+- Check the Pods status using below command:
 
-Now database is connected, we can create a dashboard showing stats about the testdb database we are connected in the previous section.
 
-1. Click on New dashboard.
+```execute
+kubectl get pods -n my-mariadb-operator-app
+```
 
-2. Click on "Dashboard settings". Give the dashboard Name and click on "Save".
+You will see a similar Output as below:
 
-   ![rename-dashboard.png](_images/rename-dashboard.png)
+```
+NAME                               READY   STATUS    RESTARTS   AGE
+mariadb-operator-f96ddc69f-d5vgr   1/1     Running   0          100s
+```
 
-3. Give a meaningful Title to the Panel list such as "mariadb-database-metric".
-  - Click on "Add panel". A new panel window will come.    
-  - Click on "Add Query".  
+Note: In above output, STATUS as "Running" shows the pods are up and running.
 
-![add-panel.png](_images/add-panel.png)
+
+Step 2: Create below yaml definition of the Custom Resource to create MariaDB Server Instance and database called test-db along with user credentials:
+
+```execute
+cat <<'EOF' > MariaDBserver.yaml
+apiVersion: mariadb.persistentsys/v1alpha1
+kind: MariaDB
+metadata:
+  name: mariadb
+spec:
+  # Keep this parameter value unchanged.
+  size: 1
   
-  - Click on "General" option on left hand side. This will provide option to give a Title to the panel.
-  
+  # Root user password
+  rootpwd: password
 
-![general-option.png](_images/general-option.png)
+  # New Database name
+  database: test-db
+  # Database additional user details (base64 encoded)
+  username: db-user 
+  password: db-user 
+
+  # Image name with version
+  image: "mariadb/server:10.3"
+
+  # Database storage Path
+  dataStoragePath: "/mnt/data" 
+
+  # Database storage Size (Ex. 1Gi, 100Mi)
+  dataStorageSize: "1Gi"
+
+  # Port number exposed for Database service
+  port: 30685
+EOF
+```
+
+- Execute below command to create an instance of MariaDBserver using the above yaml definition:
+
+```execute
+kubectl create -f MariaDBserver.yaml -n my-mariadb-operator-app 
+```
+
+Output:
+
+```
+mariadb.mariadb.persistentsys/mariadb created
+```
+
+- Check pods status :
+
+```execute
+kubectl get pods -n my-mariadb-operator-app
+```
+
+You will see a similar Output as below:
+
+```
+NAME                               READY   STATUS    RESTARTS   AGE
+mariadb-operator-f96ddc69f-l44r4   1/1     Running   0          10m
+mariadb-server-5dccfb7b59-rwzqp    1/1     Running   0          10m
+```
+
+
+Step 3 : Access MariaDB Database. 
+
+- Connect to MariaDB Server pod.
+
+ - Copy below command to the terminal,add the podname of MariaDB Server Instance.
     
-![panel-name.png](_images/panel-name.png)
-
-4. From "Query" dropdown choose "MySQL".
-    
-  ![add-datasource-as-mysql.png](_images/add-datasource-as-mysql.png)
+```copycommand
+ kubectl exec -it <podname> bash -n my-mariadb-operator-app
+ ```
 
 
-5. Click on "Edit SQL".Add below query to fetch data from table "Population" from database "testdb":
-   
-   
-   SELECT
-     year as Year,population as Population
-   FROM Population
-
-   ![edit-sql.png](_images/edit-sql.png)
-   
-   
-  ![query-db-to-get-metrics.png](_images/query-db-to-get-metrics.png)
+ - Connect to the database using username **db-user** and password **db-user**
 
 
-6. Click on "Visualization" option to see metrics on different options like : Graph, Gauge, Bar Gauge etc.
-
-![visualization.png](_images/visualization.png)
-
-7. According to the type of metrics we need to choose appropriate Visualization form. In this example we are using "Gauge" to see the MariaDB "testdb" database table:    "Population" data.
-
-8. In calc option you can use the appropriate function to view the data.In below snapshot we are using "max" to check maximum population with the year details.
-
-You have now created your first panel with a dashboard with a Gauge like below:
+ ```execute
+ mysql -h ##DNS.ip## -P 30685 -u db-user -pdb-user
+ ```
 
 
-![mariadb-gauge-db-metrics-max-population.png](_images/mariadb-gauge-db-metrics-max-population.png)
+- list database
+
+```execute
+show databases;
+```
 
 
-
-### Creating a Prometheus data source
-
-To create a Prometheus data source in Grafana:
-
-- Click on the "cogwheel" in the sidebar to open the Configuration menu.
-
-- Click on "Data Sources".
-
-![prometheus-datasource-config-option.png](_images/prometheus-datasource-config-option.png)
+- exit the database.
 
 
-- Click on "Add data source".
+```execute
+exit
+```
 
-- Select "Prometheus" as the type.
 
-- Set the appropriate Prometheus server URL : http://prometheus-operated.operators:9090 as mentioned in Grafana datasource yaml file: prometheus-datasources.yaml
+- To login through root user use below command:
 
-- Click "Save & Test" to save the new data source.
+
+```execute
+mysql -h ##DNS.ip## -P 30685 -u root -ppassword
+```
+
+- Create database testdb
+
+```execute
+create database testdb;
+```
+
+
+- Use the testdb to create some table 
+
+```execute
+use testdb;
+```
+
+
+- Create table 
+
+```execute
+create table Population(year numeric,population numeric);
+```
+
+- Insert few datas into the table so that we can check MariaDB mySQL metrics from Grafana Dashboard.
+
+```execute
+insert into Population values(2017,1380004385 );
+```
+
+```execute
+insert into Population values(2018,1366417754 );
+```
+
+```execute
+insert into Population values(2019,1352642280 );
+```
+
+```execute
+insert into Population values(2020,1338676785 );
+```
+
+
+- Retrieve the data from table
+
+```execute
+select * from Population;
+```
+
+- Exit from testdb :
+
+```execute
+exit
+```
+
+- Exit from pod :
+
+```execute
+exit
+```
+
+
+Step 4: Enable monitoring service for MariaDB Server.
+
+
+- Execute below command to get services of MariadB:
   
-  ![prometheus-datasource.PNG](_images/prometheus-datasource.PNG)
+  ```execute
+  kubectl get svc -n my-mariadb-operator-app
+  ```
 
+ You will see a similar Output as below:
+ 
+ ```
+      NAME                       TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)             AGE
+ mariadb-operator-metrics   ClusterIP   10.111.158.91    <none>        8383/TCP,8686/TCP   3d4h
+ mariadb-service            NodePort    10.106.178.202   <none>        80:30685/TCP        3d4h
+ ```
+ 
+- Get the port of mariadb-service :
   
+  From above command output, mariadb-service port is 30685 
 
-###  Creating a Prometheus graph
+- To enable monitoring using Prometheus exporter pod and service, create the below yaml definition of the Custom Resource:
 
-Follow the standard way of adding a new Grafana graph :
+```execute
+cat <<'EOF'> MariaDBmonitoring.yaml
+apiVersion: mariadb.persistentsys/v1alpha1
+kind: Monitor
+metadata:
+  name: mariadb-monitor
+spec:
+  # Add fields here
+  size: 1
+  # Database source to connect with for colleting metrics
+  # Format: "<db-user>:<db-password>@(<dbhost>:<dbport>)/<dbname>">
+  # Make approprite changes 
+  dataSourceName: "root:password@(##DNS.ip##:30685)/test-db"
+  # Image name with version
+  # Refer https://registry.hub.docker.com/r/prom/mysqld-exporter for more details
+  image: "prom/mysqld-exporter"
+EOF
+```
 
-- Click on New dashboard.
-
-- Click on "Dashboard settings".Give dashboard Name and click on "Save".
-
-![Dashboard-name-setting.png](_images/Dashboard-name-setting.png)
-
-
-- Click the "Panel Title", then click "Edit".
-
-- Click on "General" option on left hand side. This will provide option to give a Title to the panel. 
-   
-   
-![panel_list_name.png](_images/panel_list_name.png)
-
-
-- Under the "Metrics" tab, select your "Prometheus" data source.
-
-
-- Enter any Prometheus expression into the "Query" field, while using the "Metric" field to lookup metrics via autocompletion.
-  For example say here we are executing query : "mysql_global_status_commands_total"  
-  
-
-- Tune other graph settings using "Visualization" option until you have a working graph.
+Note: The database host and port should be correct for metrics to work. Host will be cluster IP and the port will be mariadb-service port(see Step 4).
 
 
-- The following shows an example Prometheus graph configuration:
+- Execute below command to Create Instance of Monitoring 
+
+```execute
+kubectl create -f MariaDBmonitoring.yaml -n my-mariadb-operator-app
+```
+
+Output:
 
 
-![metric-for-global-status-commands-total.png](_images/metric-for-global-status-commands-total.png)
+```
+monitor.mariadb.persistentsys/mariadb-monitor created
+```
+
+This will start Prometheus exporter pod and service. 
 
 
-### Conclusion 
-You can display all your data (even from multiple sources) in whatever format works best for you. There is a wide selection of visualizations built in and accessible through the community. You can customize your panels with color and transparency—whatever makes sense for your visual. You can even make your own visualization plugins if you want something a little more specific to your use case.
 
-d to visualise MariaDB monitoring metrics
+- Check pods status :
+
+
+```execute
+kubectl get pods -n my-mariadb-operator-app
+```
+
+You will see a similar Output as below:
+
+```
+NAME                                          READY   STATUS    RESTARTS   AGE
+mariadb-monitor-deployment-7dd85cfbbd-kbbjb   1/1     Running   0          9s
+mariadb-operator-f96ddc69f-l44r4              1/1     Running   0          16m
+mariadb-server-5dccfb7b59-rwzqp               1/1     Running   0          16m
+```
+
+
+### Install Prometheus Operator and Create Instance of Prometheus Server and ServiceMonitor
+
+Step 5: If you have already installed Prometheus Operator and Created Instance of Prometheus Server and ServiceMonitor, you can skip this Step 5 else proceed with Step 5.
+
+- Install the Prometheus operator by running the following command:
+
+```execute
+kubectl create -f https://operatorhub.io/install/prometheus.yaml
+```
+
+Output:
+
+```
+subscription.operators.coreos.com/my-prometheus created
+```
+
+This Operator will be installed in the "operators" namespace and will be usable from all namespaces in the cluster.
+
+
+- After Operator installation, verify that your operator got successfully installed by executing the below command :
+
+```execute
+kubectl get csv -n operators
+```
+
+You will see a similar Output as below:
+
+```
+NAME                        DISPLAY               VERSION   REPLACES                    PHASE
+prometheusoperator.0.37.0   Prometheus Operator   0.37.0    prometheusoperator.0.32.0   Succeeded
+```
+
+From above output, once operator is successfully installed, **PHASE** will be as "Succeeded" 
+
+- Check the Pods status using below command:
+
+```execute
+kubectl get pods -n operators
+```
+
+You will see a similar Output as below:
+
+```
+NAME                                   READY   STATUS    RESTARTS   AGE
+prometheus-operator-6f7589ff7f-wq9zd   1/1     Running   0          8m35s
+```
+
+In above output, STATUS as "Running" shows the pods are up and running.
+
+
+If you are installing from operatorhub, then by default it installs the operator in operators namespace.
+Below steps assumes that its deployed in operators namespace.
+
+
+
+- Create below yaml definition of the Custom Resource to create a Prometheus Instance along with a ServiceAccount and a Service of Type NodePort :
+
+
+```execute
+cat <<'EOF' > prometheusInstance.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: server
+  labels:
+    prometheus: k8s
+  namespace: operators
+spec:
+  replicas: 1
+  serviceAccountName: prometheus-k8s
+  securityContext: {}
+  serviceMonitorSelector:
+    matchLabels:
+      app: playground  
+  alerting:
+    alertmanagers:
+      - namespace: operators
+        name: alertmanager-main
+        port: web  
+EOF
+```
+
+
+- Execute below command to create Prometheus instance:
+
+
+
+```execute
+kubectl create -f prometheusInstance.yaml -n operators
+```
+
+Output:
+
+```
+prometheus.monitoring.coreos.com/server created
+```
+
+- Get the associated Pods:
+
+```execute
+kubectl get pods -n operators
+```
+
+You will see a similar Output as below:
+
+```
+NAME                                   READY   STATUS    RESTARTS   AGE
+prometheus-operator-6f7589ff7f-wq9zd   1/1     Running   0          14m
+prometheus-server-0                    3/3     Running   1          40s
+```
+
+- Create below yaml definition of the Custom Resource to create the service NodePort to access prometheus server:
+
+
+```execute
+cat <<'EOF' > prometheus_service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+spec:
+  type: NodePort
+  ports:
+  - name: web
+    nodePort: 30100
+    port: 9090
+    protocol: TCP
+    targetPort: web
+  selector:
+    app: prometheus
+EOF
+```
+
+- Execute below command to create Prometheus Service:
+
+```execute
+kubectl create -f prometheus_service.yaml -n operators
+```
+
+Output:
+
+```
+service/prometheus created
+```
+
+
+- Create below yaml definition of the Custom Resource to create Instance of ServiceMonitor:
+
+
+```execute
+cat <<'EOF' > ServiceMonitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: mariadb-monitor 
+  labels:
+    app: playground
+  namespace: operators
+spec:
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      tier: monitor-app 
+  endpoints:
+   - interval: 20s
+     port: monitor    
+EOF
+```
+
+
+- Execute below command to create ServiceMonitor instance :
+
+
+```execute
+kubectl create -f ServiceMonitor.yaml -n operators
+```
+
+Output:
+
+```
+servicemonitor.monitoring.coreos.com/mariadb-monitor created
+```
+
+
+- Get the associated Pods:
+
+```execute
+kubectl get pods -n operators
+```
+
+You will see a similar Output as below:
+
+```
+NAME                                   READY   STATUS    RESTARTS   AGE
+prometheus-operator-6f7589ff7f-wq9zd   1/1     Running   0          19m
+prometheus-server-0                    3/3     Running   1          5m40s
+```
+
+
+
+Step 6 : Access the Prometheus dashboard using below link:
+
+http://##DNS.ip##:30100
+
+![](_images/prom.png)
+
+
+- On the prometheus UI, Go to Status -> Targets to see endpoints.
+
+
+ ![](_images/targetsmariadb.PNG)
+
+
+
+- From the dropdown you can select the query and click on "Execute" to see MariaDB Metrics. See below snapshot :
+
+
+![](_images/queryexecution.PNG)
+
+
+
+### Install Grafana Operator and create Grafana Instance and Grafana NodePort Service
+
+
+Step 7 : If you have already installed with Grafana Operator and created Grafana Instance and Service, you can skip this Step 7, else refer the "Grafana Instance Creation" tutorial.
+
+
+
+
+Step 8: Create the below yaml definition of the Custom Resource to create Instance of Grafana Datasources :
+
+```execute
+cat <<'EOF' > prometheus-datasources.yaml
+apiVersion: integreatly.org/v1alpha1
+kind: GrafanaDataSource
+metadata:
+  name: prometheus-grafanadatasource
+spec:
+  datasources:
+    - access: proxy
+      editable: true
+      isDefault: true
+      jsonData:
+        timeInterval: 5s
+      name: Prometheus
+      type: prometheus
+      url: 'http://prometheus-operated.operators:9090'
+      version: 1
+  name: prometheus-datasources.yaml  
+EOF
+```
+
+Here we are choosing Prometheus as our datasourse.
+
+
+Execute below command to create an instance of Grafana datasourse using the above yaml definition:
+
+
+```execute
+kubectl create -f prometheus-datasources.yaml -n my-grafana-operator
+```
+
+Output:
+
+```
+grafanadatasource.integreatly.org/prometheus-grafanadatasource created
+```
+
+Step 9 :Access and Configure Grafana dashboard via Grafana UI
+
+
+- Execute below command to get all services in "my-grafana-operator" namespace:
+
+
+```execute
+kubectl get svc -n my-grafana-operator
+```
+
+
+You will see a similar Output as below:
+
+
+```
+NAME                       TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+grafana-operator-metrics   ClusterIP   10.96.188.27     <none>        8080/TCP         83s
+grafana-service            ClusterIP   10.105.85.60     <none>        3000/TCP         47s
+grafana-svc                NodePort    10.109.242.171   <none>        3000:30200/TCP   7s
+```
+
+Port value of "grafana-svc" Service NodePort is : 30200
+
+
+We can access the Grafana dashboard on the nodePort : 30200 using below url:
+
+
+Click on the <a href="http://##DNS.ip##:30200" target="_blank">http://##DNS.ip##:30200</a> to access Grafana Dashboard from your browser.
+
+
+You will see the Grafana page loading as below :
+
+
+![](_images/load.png)
+
+
+Now click on the `Sign In` button as below :
+
+![](_images/signin.png)
+
+You will now need to log in to Grafana Dashboard with the following credentials in the page below:
+
+
+```
+user: root
+password: secret
+```
+![](_images/login.png)
+
+
+Now you will be able to see the Dashboard like below:
+
+
+![](_images/dashboard.png)
+
+
+
+### Configure Grafana Dashboard to visualise MariaDB monitoring metrics
 
 Learn how to Configure Grafana Dashboard to visualise MariaDB monitoring metrics from this tutorial: "Grafana Dashboard". 
 
 
+ page loading as below :
 
+
+![](_images/load.png)
+
+
+Now click on the `Sign In` button as below :
+
+![](_images/signin.png)
+
+You will now need to log in to Grafana Dashboard with the following credentials in the page below:
+
+
+```
+user: root
+password: secret
+```
+![](_images/login.png)
+
+
+Now you will be able to see the Dashboard like below:
+
+
+![](_images/dashboard.png)
+
+
+
+### Configure Grafana Dashboard to visualise MariaDB monitoring metrics
+
+Learn how to Configure Grafana Dashboard to visualise MariaDB monitoring metrics from this tutorial: "Grafana Dashboard". 
+
+
+d.png)
+
+   Running   0          45s
+```
