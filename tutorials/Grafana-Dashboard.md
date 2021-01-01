@@ -144,10 +144,3 @@ Follow the standard way of adding a new Grafana graph :
 
 ### Conclusion 
 You can display all your data (even from multiple sources) in whatever format works best for you. There is a wide selection of visualizations built in and accessible through the community. You can customize your panels with color and transparency—whatever makes sense for your visual. You can even make your own visualization plugins if you want something a little more specific to your use case.
-
-d to visualise MariaDB monitoring metrics
-
-Learn how to Configure Grafana Dashboard to visualise MariaDB monitoring metrics from this tutorial: "Grafana Dashboard". 
-
-
-
