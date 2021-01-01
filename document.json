@@ -1,20 +1,28 @@
 {
   "name": "test - Grafana Operator",
-  "description": "A Kubernetes Operator based on the Operator SDK for creating and managing Grafana instances. Grafana is an open platform for beautiful analytics and monitoring.",
-  "logo": "_images/logo.PNG",
+  "description": "Grafana Operator",
+  "logo": "_images/dataset.png",
   "has_supporting_content": false,
-  "stack_id": "Grafana_Operator_operator_1609309826387",
-  "type": "stack",
-  "source_repo": "https://github.com/operator-playground-io/Grafana-Operator-Playground-tile",
+  "stack_id": "test_-_Grafana_Operator-operator_1609481185652",
+  "type": "Operators",
+  "Categories": [
+    "Monitoring"
+  ],
+  "platform": [
+    null
+  ],
+  "source_repo": "https://sourceurl.com",
   "cover": "cover.md",
   "use_explorer_dataset": false,
+  "use_catalog_dataset": "",
   "is_s3_type": false,
+  "deployment_information": "",
   "meta": {
     "Install Time": [
-      "5 minutes"
+      "2 minutes"
     ],
     "Type": [
-      "Operator"
+      "Operators"
     ],
     "Dataset": [
       ""
@@ -23,21 +31,60 @@
       "Monitoring"
     ],
     "Catalog Id": [
-      "Grafana_Operator_operator_1609309826387"
+      "test_-_Grafana_Operator-operator_1609481185652"
     ],
-    "Contact": [],
-  }
+    "Contact": [
+      "email@example.com"
+    ],
     "commands": [
-        {
-          "description": "Set Namespace",
-          "exec": "export GRAFANA_OPERATOR_NAMESPACE=my-grafana-operato"
-        },
-        {
-          "description": "Install Operator",
-          "exec": "kubectl create -f https://operatorhub.io/install/grafana-operator.yaml"
-        }
+      {
+        "description": "Set Namespace",
+        "exec": "export GRAFANA_OPERATOR_NAMESPACE=my-grafana-operato"
+      },
+      {
+        "description": "Prepare Workspace",
+        "exec": "cd /home/student/projects && mkdir grafana-operator && cd grafana-operator"
+      },
+      {
+        "description": "Install Operator",
+        "exec": "kubectl create -f https://operatorhub.io/install/grafana-operator.yaml"
+      }
     ],
-    "platform": [
-      "kubernetes"
+    "Preferred Platform": [
+      "OpenShift"
+    ],
+    "Usage Example(URL)": [
+      "example.com"
+    ],
+    "Last updated": [
+      "Dec 29 2020"
+    ],
+    "Managed By": [
+      "Manager"
+    ],
+    "License and Use Rights": [
+      "Licence and use rights"
     ]
+  },
+  "commands": [
+    {
+      "description": "Set Namespace",
+      "exec": "export GRAFANA_OPERATOR_NAMESPACE=my-grafana-operato"
+    },
+    {
+      "description": "Prepare Workspace",
+      "exec": "cd /home/student/projects && mkdir grafana-operator && cd grafana-operator"
+    },
+    {
+      "description": "Install Operator",
+      "exec": "kubectl create -f https://operatorhub.io/install/grafana-operator.yaml"
+    }
+  ],
+  "display": [
+    {
+      "name": "Developer Dashboard",
+      "url": "##DNS.host##/codeserve",
+      "enabled": true
+    }
+  ]
 }
