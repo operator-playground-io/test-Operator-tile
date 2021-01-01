@@ -26,7 +26,6 @@ The Operator can deploy and manage a Grafana instance on Kubernetes and OpenShif
 # Grafana Operator Architecture
 A high level Prometheus & Grafana Architecture diagram is shown below :
 
-
 ![Grafana-Architecture.png](_images/Grafana-Architecture.png)
 
 # Objective of tutorial 
